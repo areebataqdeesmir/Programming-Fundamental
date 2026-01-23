@@ -3,15 +3,14 @@ using namespace std;
 
 int main()
 {
-    int num = 25;
+    int num = 10;        // integer variable
+    int *ptr;            // pointer declaration
 
-    void *ptr;
-    ptr = &num;
+    ptr = &num;          // pointer stores address of num
 
-    int *p;        // create integer pointer
-    p = (int*)ptr; // cast void pointer to int pointer
+    *ptr = 25;           // change value of num using pointer
 
-    cout << "Value using void pointer: " << *p;
+    cout << "Modified value of num: " << num << endl;
 
     return 0;
 }
