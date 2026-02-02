@@ -54,19 +54,20 @@ int main() {
     // --- PRE-LOADED DATA ---
     customerNames[0] = "Shiza Mukhtar"; eventDetails[0] = "Wedding + Catering"; individualBills[0] = 2800.0; 
     bookingDates[0] = "12-10-2026"; eventCount++;
-
+    
     customerNames[1] = "Sara Khan"; eventDetails[1] = "Birthday + Theme"; individualBills[1] = 620.0; 
     bookingDates[1] = "15-11-2025"; eventCount++;
 
     customerNames[2] = "Samia Arshad"; eventDetails[2] = "Corporate + Catering"; individualBills[2] = 1850.0; 
     bookingDates[2] = "20-12-2025"; eventCount++;
 
+
     int mainChoice;
     bool systemRunning = true;
 
     while (systemRunning) {
         cout << "\n==========================================================" << endl;
-        cout << "         EVENT PRO: EVENT MANAGEMENT SYSTEM (V3.0)        " << endl;
+        cout << "         EVENT PRO: EVENT MANAGEMENT SYSTEM (V3.2)        " << endl;
         cout << "==========================================================" << endl;
         cout << "1. Create New Event Booking " << endl;
         cout << "2. View All Active Bookings" << endl;
@@ -93,14 +94,46 @@ int main() {
 
                 cout << "\n--- New Booking Details ---" << endl;
                 cout << "Customer Name: "; cin.ignore(); getline(cin, name);
-                cout << "Event Date (DD MM YYYY): "; cin >> d >> m >> y;
+                
+                // --- IMPROVED STRICTOR DATE VALIDATION ---
+                bool isDateValid = false;
+                while (!isDateValid) {
+                    cout << "Event Date (DD MM YYYY): "; cin >> d >> m >> y;
+
+                    // 1. Check Year
+                    if (y < 2026) {
+                        cout << ">> INVALID YEAR: We only accept bookings for 2026 onwards." << endl;
+                        continue;
+                    }
+                    // 2. Check Month
+                    if (m < 1 || m > 12) {
+                        cout << ">> INVALID MONTH: Please enter 1-12." << endl;
+                        continue;
+                    }
+                    // 3. Check Days based on month
+                    int maxDays = 31;
+                    if (m == 4 || m == 6 || m == 9 || m == 11) maxDays = 30;
+                    else if (m == 2) maxDays = 28; // Standard year check
+
+                    if (d < 1 || d > maxDays) {
+                        cout << ">> INVALID DAY: Month " << m << " does not have " << d << " days." << endl;
+                        continue;
+                    }
+
+                    isDateValid = true; // If it reaches here, date is perfect
+                }
+
                 cout << "Number of People (Guests): "; cin >> guests;
                 cout << "Venue Type (Indoor/Outdoor): "; cin >> venue;
 
                 predictWeatherAndAdvice(m, venue);
 
-                // ---  EVENT TYPES ---
-                cout << "\n--- SELECT EVENT TYPE ---" << endl;
+                // --- EVENT TYPE VALIDATION ---
+                string eNames[] = {"", "Birthday", "Wedding", "Corporate", "Engagement", "Seminar", "Concert", "Workshop", "Exhibition", "Party", "Nikkah"};
+                double ePrices[] = {0, 500, 2000, 1000, 1500, 800, 3000, 700, 2500, 600, 1200};
+                
+                while (true) {
+                   cout << "\n--- SELECT EVENT TYPE ---" << endl;
         
                 cout << "1.  Birthday ($500)" << endl;
                 cout << "2.  Wedding ($2000)" << endl;
@@ -114,22 +147,21 @@ int main() {
                 cout << "10. Nikkah ($1200)" << endl;
                 cout << "Choice (1-10): "; cin >> typeChoice;
 
-                string summary;
-                double ePrices[] = {0, 500, 2000, 1000, 1500, 800, 3000, 700, 2500, 600, 1200};
-                string eNames[] = {"", "Birthday", "Wedding", "Corporate", "Engagement", "Seminar", "Concert", "Workshop", "Exhibition", "Party", "Nikkah"};
-                
-                if(typeChoice >= 1 && typeChoice <= 10) {
-                    summary = eNames[typeChoice];
-                    eventPrice = ePrices[typeChoice];
-                } else {
-                    summary = "Custom Event";
-                    eventPrice = 500;
+                    if (typeChoice >= 1 && typeChoice <= 10) break;
+                    else cout << ">> ERROR: Invalid selection! Pick 1 to 10." << endl;
                 }
 
-                // --- 10 THEME OPTIONS ---
+                string summary = eNames[typeChoice];
+                eventPrice = ePrices[typeChoice];
+
+                // --- THEME VALIDATION ---
                 cout << "\nInclude Premium Theme? (y/n): "; cin >> opt;
                 if (opt == 'y' || opt == 'Y') {
-                    cout << "\n--- SELECT THEME ---" << endl;
+                    string tNames[] = {"", "Princess", "Superhero", "Royal", "Vintage", "Neon", "Minimalist", "Arabian", "Garden", "Space", "Winter"};
+                    double tPrices[] = {0, 100, 120, 300, 250, 400, 150, 350, 200, 450, 300};
+
+                    while (true) {
+                      cout << "\n--- SELECT THEME ---" << endl;
                     cout << "1.  Princess ($100)" << endl;
                     cout << "2.  Superhero ($120)" << endl;
                     cout << "3.  Royal ($300)" << endl;
@@ -141,18 +173,19 @@ int main() {
                     cout << "9.  Space ($450)" << endl;
                     cout << "10. Winter ($300)" << endl;
                     cout << "Choice (1-10): "; cin >> sub;
-                    
-                    double tPrices[] = {0, 100, 120, 300, 250, 400, 150, 350, 200, 450, 300};
-                    string tNames[] = {"", "Princess", "Superhero", "Royal", "Vintage", "Neon", "Minimalist", "Arabian", "Garden", "Space", "Winter"};
-                    
-                    if(sub >= 1 && sub <= 10) {
-                        themeName = tNames[sub];
-                        summary += " + " + themeName + " Theme";
-                        themePrice = tPrices[sub];
+                        
+                        if (sub >= 1 && sub <= 10) {
+                            themeName = tNames[sub];
+                            summary += " + " + themeName + " Theme";
+                            themePrice = tPrices[sub];
+                            break;
+                        } else {
+                            cout << ">> ERROR: Invalid Theme! Pick 1 to 10." << endl;
+                        }
                     }
                 }
                 
-                // --- GUEST BASED FOOD LOGIC ---
+                // --- FOOD LOGIC ---
                 cout << "\nAdd Food Package? (y/n): "; cin >> opt;
                 if (opt == 'y' || opt == 'Y') {
                     cout << "1. Basic ($15/p)\n2. Premium ($35/p)\n3. Executive ($60/p)" << endl;
@@ -161,16 +194,15 @@ int main() {
                     summary += " + Catering";
                 }
 
-                // Experience Rating
                 cout << "\nRate your booking experience (1-5 Stars): "; cin >> rating;
 
                 double foodTotal = foodRate * guests;
                 double subTotal = eventPrice + themePrice + foodTotal;
-                double tax = subTotal * 0.05; // 5% Tax
-                double discount = (guests > 100) ? 50.0 : 0.0; // $50 discount if guests > 100
+                double tax = subTotal * 0.05; 
+                double discount = (guests > 100) ? 50.0 : 0.0; 
                 total = subTotal + tax - discount;
 
-       // ---  PERFECTLY ALIGNED RECEIPT ---
+                 // ---  PERFECTLY ALIGNED RECEIPT ---
                 cout << "\n\n==================================================";
                // --- FINAL ALIGNED RECEIPT (STRICT COLUMN LOCK) ---
                 cout << "\n\n==================================================";
@@ -228,15 +260,12 @@ int main() {
                 eventCount++;
                 break;
             }
-
+            
             case 2: { 
                 cout << "\n" << left << setw(18) << "Customer" << setw(15) << "Date" << setw(50) << "Summary" << setw(10) << "Bill" << endl;
                 cout << "----------------------------------------------------------------------------------------------------------------" << endl;
                 for (int i = 0; i < eventCount; i++) {
-                    cout << left << setw(18) << customerNames[i] 
-                         << setw(15) << bookingDates[i] 
-                         << setw(50) << eventDetails[i] 
-                         << "$" << fixed << setprecision(2) << individualBills[i] << endl;
+                    cout << left << setw(18) << customerNames[i] << setw(15) << bookingDates[i] << setw(50) << eventDetails[i] << "$" << fixed << setprecision(2) << individualBills[i] << endl;
                 }
                 break;
             }
